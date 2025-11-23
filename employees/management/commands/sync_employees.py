@@ -3,6 +3,7 @@ import asyncio
 import logging
 from employees.config import EXTERNAL_EMPLOYEE_API_URL
 from employees.services import EmployeeSyncService
+from core.exceptions import NetworkError, InvalidURLError, TimeoutError, InvalidDataError
 
 logger = logging.getLogger('employees')
 
@@ -38,6 +39,9 @@ class Command(BaseCommand):
             
             logger.info(f"Employee sync completed. New: {new_count}, Updated: {updated_count}")
         
+        except (NetworkError, InvalidURLError, TimeoutError, InvalidDataError) as e:
+            self.stdout.write(self.style.ERROR(f'Sync failed: {e.detail}'))
+            logger.error(f"Employee sync failed: {e.detail}", exc_info=True)
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Sync failed: {str(e)}'))
             logger.error(f"Employee sync failed: {str(e)}", exc_info=True)

@@ -2,6 +2,13 @@
 
 Django REST API for managing employees and leave requests with role-based access control, comprehensive validation, and production-ready features.
 
+## Recommended
+
+For quick testing and exploration, use the **Postman Collection** located at:
+`Post Man Collection For Testing/Employee_Leave_Management.postman_collection.json`
+
+The collection includes comprehensive test scenarios, authentication flows, and all API endpoints with detailed documentation.
+
 ## Tech Stack
 
 - Django 5.2 (LTS)
@@ -34,8 +41,8 @@ Django REST API for managing employees and leave requests with role-based access
 
 ```bash
 # Clone repository
-git clone <repository-url>
-cd Employee-Leave-Management
+git clone https://github.com/mustafajuba98/Employee-Leave-Management-Backend-Django-.git
+cd Employee-Leave-Management-Backend-Django-
 
 # Create virtual environment
 python -m venv venv
@@ -153,11 +160,6 @@ python manage.py sync_employees --api-url <url>
 pytest
 ```
 
-Test files:
-- `tests/test_api.py` - API endpoint tests
-- `employees/tests.py` - Employee model tests
-- `leaves/tests.py` - Leave request model tests
-
 ## Project Structure
 
 ```
@@ -250,4 +252,4 @@ Automatic rotation: 10MB max, 5 backups.
 
 Interactive documentation available at `/api/docs/` (Swagger UI).
 
-Postman collection included: `Employee_Leave_Management.postman_collection.json`
+For comprehensive testing scenarios, use the Postman collection: `Post Man Collection For Testing/Employee_Leave_Management.postman_collection.json`
