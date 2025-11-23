@@ -1,0 +1,1647 @@
+{
+	"info": {
+		"_postman_id": "employee-leave-management-api",
+		"name": "Employee Leave Management API",
+		"description": "Complete API collection for Employee Leave Management System with comprehensive documentation, filters, pagination, and test scenarios",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"description": "JWT Authentication endpoints",
+			"item": [
+				{
+					"name": "Get JWT Token",
+					"description": "Obtain JWT access and refresh tokens. Use the access token in Authorization header for authenticated requests.",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "token", ""]
+						}
+					}
+				},
+				{
+					"name": "Refresh JWT Token",
+					"description": "Refresh access token using refresh token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/refresh/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "token", "refresh", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"description": "Employee management endpoints (HR Only). All endpoints require HR role.",
+			"item": [
+				{
+					"name": "List Employees (HR Only)",
+					"description": "List all employees with filtering, searching, and pagination.\n\n**Filters:**\n- `company_id` - Filter by company ID\n\n**Search:**\n- Searches in `name` and `email` fields\n\n**Ordering:**\n- `name`, `email`, `created_at` (use `-` prefix for descending)\n\n**Pagination:**\n- `page` - Page number (default: 1)\n- `page_size` - Items per page (default: 20, max: 100)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees/?company_id=12345&search=john&ordering=-created_at&page=1&page_size=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", ""],
+							"query": [
+								{
+									"key": "company_id",
+									"value": "12345",
+									"description": "Filter by company ID",
+									"disabled": false
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"description": "Search in name and email fields",
+									"disabled": false
+								},
+								{
+									"key": "ordering",
+									"value": "-created_at",
+									"description": "Order by: name, email, created_at (use - for descending)",
+									"disabled": false
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)",
+									"disabled": false
+								},
+								{
+									"key": "page_size",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)",
+									"disabled": false
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Employee (HR Only)",
+					"description": "Create a new employee.\n\n**Required Fields:**\n- `name` - Employee name (min 2 characters)\n- `email` - Employee email (must be unique)\n- `company_id` - Company ID (must be positive number)\n\n**Optional Fields:**\n- `joining_date` - Joining date (cannot be in future)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"company_id\": 12345,\n    \"joining_date\": \"2025-01-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Employee Details (HR Only)",
+					"description": "Get details of a specific employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "1", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Employee (HR Only)",
+					"description": "Partially update an employee. All fields are optional.",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe Updated\",\n    \"company_id\": 12346\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "1", ""]
+						}
+					}
+				},
+				{
+					"name": "Delete Employee (HR Only)",
+					"description": "Delete an employee by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "1", ""]
+						}
+					}
+				},
+				{
+					"name": "Sync Employees from External API (HR Only)",
+					"description": "Sync employees from an external API. Creates new employees and updates existing ones based on email.\n\n**Parameters:**\n- `api_url` (optional) - External API URL (defaults to EXTERNAL_EMPLOYEE_API_URL from config)\n\n**Response includes:**\n- `new_employees` - Count of newly created employees\n- `updated_employees` - Count of updated employees\n- `total_processed` - Total employees processed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"api_url\": \"https://jsonplaceholder.typicode.com/users\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees/sync/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "employees", "sync", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Leave Requests",
+			"description": "Leave request management endpoints. Employees can create and view their own leaves. HR can manage all leaves.",
+			"item": [
+				{
+					"name": "List Leave Requests",
+					"description": "List leave requests with filtering, searching, and pagination.\n\n**Filters:**\n- `status` - Filter by status: `pending`, `approved`, `rejected`\n- `leave_type` - Filter by type: `annual`, `sick`, `casual`\n- `employee_id` - Filter by employee ID (must be positive number)\n\n**Search:**\n- Searches in `employee__name` and `employee__email` fields\n\n**Ordering:**\n- `created_at`, `start_date`, `end_date`, `status`, `leave_type` (use `-` prefix for descending)\n\n**Pagination:**\n- `page` - Page number (default: 1)\n- `page_size` - Items per page (default: 20, max: 100)\n\n**Note:** Employees can only see their own leave requests. HR can see all.",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/leaves/?status=pending&leave_type=annual&employee_id=1&search=john&ordering=-created_at&page=1&page_size=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", ""],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status: pending, approved, rejected",
+									"disabled": false
+								},
+								{
+									"key": "leave_type",
+									"value": "annual",
+									"description": "Filter by type: annual, sick, casual",
+									"disabled": false
+								},
+								{
+									"key": "employee_id",
+									"value": "1",
+									"description": "Filter by employee ID (must be positive number)",
+									"disabled": false
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"description": "Search in employee name and email fields",
+									"disabled": false
+								},
+								{
+									"key": "ordering",
+									"value": "-created_at",
+									"description": "Order by: created_at, start_date, end_date, status, leave_type (use - for descending)",
+									"disabled": false
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)",
+									"disabled": false
+								},
+								{
+									"key": "page_size",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)",
+									"disabled": false
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Leave Request (Employee - Auto)",
+					"description": "Create a leave request. For employees, the `employee` field is automatically set to their profile.\n\n**Required Fields:**\n- `leave_type` - Type: `annual`, `sick`, or `casual`\n- `start_date` - Start date (YYYY-MM-DD, cannot be in past)\n- `end_date` - End date (YYYY-MM-DD, must be after start_date, cannot be in past)\n\n**Optional Fields:**\n- `employee` - Employee ID (only for HR users, defaults to current user's employee profile)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"leave_type\": \"annual\",\n    \"start_date\": \"2025-12-01\",\n    \"end_date\": \"2025-12-05\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leaves/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", ""]
+						}
+					}
+				},
+				{
+					"name": "Create Leave Request (HR - For Specific Employee)",
+					"description": "HR users can create leave requests for any employee by specifying the `employee` field.",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee\": 1,\n    \"leave_type\": \"annual\",\n    \"start_date\": \"2025-12-01\",\n    \"end_date\": \"2025-12-05\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leaves/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Leave Request Details",
+					"description": "Get details of a specific leave request. Employees can only view their own leaves.",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/leaves/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", "1", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Leave Request (HR Only)",
+					"description": "Update leave request. HR can update status or other fields. Only pending leaves can have status changed.",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"approved\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leaves/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", "1", ""]
+						}
+					}
+				},
+				{
+					"name": "Approve Leave Request (HR Only)",
+					"description": "Approve a leave request. Alternative endpoint to PATCH with status=approved.",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/leaves/1/approve/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", "1", "approve", ""]
+						}
+					}
+				},
+				{
+					"name": "Reject Leave Request (HR Only)",
+					"description": "Reject a leave request. Alternative endpoint to PATCH with status=rejected.",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/leaves/1/reject/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "leaves", "1", "reject", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Scenarios",
+			"description": "Comprehensive test scenarios for validation, error handling, and edge cases",
+			"item": [
+				{
+					"name": "Validation Tests",
+					"description": "Tests for input validation and business rules",
+					"item": [
+						{
+							"name": "Create Leave - End Date Before Start Date (Should Fail)",
+							"description": "Test validation: end_date must be after start_date",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"leave_type\": \"annual\",\n    \"start_date\": \"2025-12-05\",\n    \"end_date\": \"2025-12-01\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Leave - Past Date (Should Fail)",
+							"description": "Test validation: dates cannot be in the past",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"leave_type\": \"annual\",\n    \"start_date\": \"2020-01-01\",\n    \"end_date\": \"2020-01-05\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Leave - Invalid Leave Type (Should Fail)",
+							"description": "Test validation: leave_type must be one of: annual, sick, casual",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"leave_type\": \"invalid_type\",\n    \"start_date\": \"2025-12-01\",\n    \"end_date\": \"2025-12-05\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Leave - Missing Required Fields (Should Fail)",
+							"description": "Test validation: all required fields must be provided",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"leave_type\": \"annual\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Leave - Overlapping Approved Leave (Should Fail)",
+							"description": "Test validation: cannot create leave that overlaps with approved leave",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"leave_type\": \"sick\",\n    \"start_date\": \"2025-12-03\",\n    \"end_date\": \"2025-12-07\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Employee - Duplicate Email (Should Fail)",
+							"description": "Test validation: email must be unique",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Duplicate Employee\",\n    \"email\": \"john.doe@example.com\",\n    \"company_id\": 99999,\n    \"joining_date\": \"2025-01-15\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/employees/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Employee - Future Joining Date (Should Fail)",
+							"description": "Test validation: joining_date cannot be in the future",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Future Employee\",\n    \"email\": \"future@example.com\",\n    \"company_id\": 88888,\n    \"joining_date\": \"2030-01-01\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/employees/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Employee - Invalid Company ID (Should Fail)",
+							"description": "Test validation: company_id must be a positive number",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Test Employee\",\n    \"email\": \"test@example.com\",\n    \"company_id\": -1,\n    \"joining_date\": \"2025-01-15\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/employees/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Employee - Empty Name (Should Fail)",
+							"description": "Test validation: name must be at least 2 characters",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"\",\n    \"email\": \"test@example.com\",\n    \"company_id\": 12345\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/employees/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""]
+								}
+							}
+						},
+						{
+							"name": "Update Leave Status - Non-Pending (Should Fail)",
+							"description": "Test validation: only pending leaves can have status updated",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"approved\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/1/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", "1", ""]
+								}
+							}
+						},
+						{
+							"name": "Update Leave Status - Invalid Status (Should Fail)",
+							"description": "Test validation: status must be 'approved' or 'rejected'",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"invalid_status\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/1/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", "1", ""]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Invalid Employee ID (Should Fail)",
+							"description": "Test validation: employee_id must be a valid positive number",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?employee_id=abc",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "employee_id",
+											"value": "abc",
+											"description": "Invalid: must be a number"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Sync Employees - Invalid URL (Should Fail)",
+							"description": "Test validation: api_url must be a valid URL",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"api_url\": \"invalid-url\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/employees/sync/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", "sync", ""]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Permission Tests",
+					"description": "Tests for role-based access control",
+					"item": [
+						{
+							"name": "Employee Try to Approve (Should Fail - 403)",
+							"description": "Test: Employees cannot approve/reject leaves",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{employee_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"approved\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/1/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", "1", ""]
+								}
+							}
+						},
+						{
+							"name": "Employee Try to Create Leave for Another (Should Fail - 403)",
+							"description": "Test: Employees can only create leaves for themselves",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{employee_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employee\": 2,\n    \"leave_type\": \"annual\",\n    \"start_date\": \"2025-12-01\",\n    \"end_date\": \"2025-12-05\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Employee Try to Access Employees (Should Fail - 403)",
+							"description": "Test: Only HR can access employee endpoints",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{employee_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/employees/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""]
+								}
+							}
+						},
+						{
+							"name": "Unauthenticated Request (Should Fail - 401)",
+							"description": "Test: All endpoints require authentication",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Pagination Tests",
+					"description": "Tests for pagination functionality",
+					"item": [
+						{
+							"name": "List Leaves - Page 1",
+							"description": "Test: First page with default page size",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?page=1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Custom Page Size",
+							"description": "Test: Custom page size (max: 100)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?page=1&page_size=50",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "page_size",
+											"value": "50"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Invalid Page (Should Fail)",
+							"description": "Test: Invalid page number returns 404",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?page=99999",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "page",
+											"value": "99999"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Filtering Tests",
+					"description": "Tests for filtering functionality",
+					"item": [
+						{
+							"name": "List Leaves - Filter by Status",
+							"description": "Test: Filter leaves by status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?status=approved",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "status",
+											"value": "approved"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Filter by Leave Type",
+							"description": "Test: Filter leaves by type",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?leave_type=sick",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "leave_type",
+											"value": "sick"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Filter by Employee ID",
+							"description": "Test: Filter leaves by employee",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?employee_id=1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "employee_id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Multiple Filters",
+							"description": "Test: Combine multiple filters",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?status=pending&leave_type=annual&employee_id=1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "status",
+											"value": "pending"
+										},
+										{
+											"key": "leave_type",
+											"value": "annual"
+										},
+										{
+											"key": "employee_id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Employees - Filter by Company ID",
+							"description": "Test: Filter employees by company ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/employees/?company_id=12345",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""],
+									"query": [
+										{
+											"key": "company_id",
+											"value": "12345"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Search Tests",
+					"description": "Tests for search functionality",
+					"item": [
+						{
+							"name": "List Leaves - Search by Employee Name",
+							"description": "Test: Search leaves by employee name",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?search=john",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "search",
+											"value": "john"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Employees - Search by Name or Email",
+							"description": "Test: Search employees by name or email",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/employees/?search=doe",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""],
+									"query": [
+										{
+											"key": "search",
+											"value": "doe"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Ordering Tests",
+					"description": "Tests for ordering functionality",
+					"item": [
+						{
+							"name": "List Leaves - Order by Created Date (Descending)",
+							"description": "Test: Order leaves by creation date (newest first)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?ordering=-created_at",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "ordering",
+											"value": "-created_at"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Leaves - Order by Start Date (Ascending)",
+							"description": "Test: Order leaves by start date (oldest first)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?ordering=start_date",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "ordering",
+											"value": "start_date"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "List Employees - Order by Name",
+							"description": "Test: Order employees by name",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/employees/?ordering=name",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""],
+									"query": [
+										{
+											"key": "ordering",
+											"value": "name"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Rate Limiting Tests",
+					"description": "Tests for rate limiting functionality. These tests verify that rate limits are properly enforced.\n\n**Rate Limits:**\n- Authentication: 5 requests/minute\n- Employee Sync: 10 requests/hour\n- Create Leave: 20 requests/hour\n- General API: 1000 requests/hour",
+					"item": [
+						{
+							"name": "Authentication Rate Limit - Multiple Requests",
+							"description": "Test: Authentication endpoint rate limiting (5/minute). Send 6 requests quickly to trigger rate limit.\n\n**Note:** Run this test multiple times in quick succession (use Collection Runner with delay 0) to trigger rate limit.\n\n**Expected:** First 5 requests succeed (200), 6th request should return 429 (Too Many Requests).",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 or 429\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 429]);",
+											"});",
+											"",
+											"if (pm.response.code === 429) {",
+											"    pm.test(\"Rate limit error message\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('detail');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/token/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "token", ""]
+								}
+							}
+						},
+						{
+							"name": "Employee Sync Rate Limit - Multiple Requests",
+							"description": "Test: Employee sync endpoint rate limiting (10/hour). Send 11 requests to trigger rate limit.\n\n**Note:** This test requires waiting or using Collection Runner. Rate limit resets every hour.\n\n**Expected:** First 10 requests succeed (200), 11th request should return 429 (Too Many Requests).",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200 or 429\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 429]);",
+											"});",
+											"",
+											"if (pm.response.code === 429) {",
+											"    pm.test(\"Rate limit error message\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('detail');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"api_url\": \"https://jsonplaceholder.typicode.com/users\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/employees/sync/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", "sync", ""]
+								}
+							}
+						},
+						{
+							"name": "Create Leave Rate Limit - Multiple Requests",
+							"description": "Test: Create leave endpoint rate limiting (20/hour). Send 21 requests to trigger rate limit.\n\n**Note:** This test requires waiting or using Collection Runner. Rate limit resets every hour.\n\n**Expected:** First 20 requests succeed (201), 21st request should return 429 (Too Many Requests).",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201 or 429\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201, 429]);",
+											"});",
+											"",
+											"if (pm.response.code === 429) {",
+											"    pm.test(\"Rate limit error message\", function () {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('detail');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"leave_type\": \"casual\",\n    \"start_date\": \"2025-12-10\",\n    \"end_date\": \"2025-12-11\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Rate Limit Headers Check",
+							"description": "Test: Verify rate limit headers are present in response.\n\n**Expected Headers:**\n- `X-RateLimit-Limit` - Maximum requests allowed\n- `X-RateLimit-Remaining` - Remaining requests\n- `X-RateLimit-Reset` - Time when limit resets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Rate limit headers present\", function () {",
+											"    const headers = pm.response.headers;",
+											"    ",
+											"    if (pm.response.code !== 429) {",
+											"        pm.expect(headers.has('X-RateLimit-Limit')).to.be.true;",
+											"        pm.expect(headers.has('X-RateLimit-Remaining')).to.be.true;",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/token/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "token", ""]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Performance Tests",
+					"description": "Tests for performance optimizations including caching.\n\n**Note:** Caching is implemented for:\n- Employee list (5 minutes cache)\n- Leave requests list (2 minutes cache)\n\n**Testing Caching:**\n- First request: Normal response time\n- Second request (within cache TTL): Should be faster (cached response)\n- Check response headers for cache indicators",
+					"item": [
+						{
+							"name": "Employee List - Cache Test",
+							"description": "Test: Employee list endpoint caching (5 minutes).\n\n**How to test:**\n1. Send first request and note response time\n2. Send second request immediately (should be faster due to cache)\n3. Check that response is identical\n\n**Note:** Cache varies by Authorization header, so each user has separate cache.",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.expect(pm.response.code).to.equal(200);",
+											"});",
+											"",
+											"pm.test(\"Response has results\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('results');",
+											"});",
+											"",
+											"const responseTime = pm.response.responseTime;",
+											"pm.test(\"Response time is reasonable\", function () {",
+											"    pm.expect(responseTime).to.be.below(5000);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/employees/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "employees", ""]
+								}
+							}
+						},
+						{
+							"name": "Leave Requests List - Cache Test",
+							"description": "Test: Leave requests list endpoint caching (2 minutes).\n\n**How to test:**\n1. Send first request and note response time\n2. Send second request immediately (should be faster due to cache)\n3. Check that response is identical\n\n**Note:** Cache varies by Authorization header, so each user has separate cache.",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.expect(pm.response.code).to.equal(200);",
+											"});",
+											"",
+											"pm.test(\"Response has results\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('results');",
+											"});",
+											"",
+											"const responseTime = pm.response.responseTime;",
+											"pm.test(\"Response time is reasonable\", function () {",
+											"    pm.expect(responseTime).to.be.below(5000);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""]
+								}
+							}
+						},
+						{
+							"name": "Query Optimization - Select Related",
+							"description": "Test: Verify that queries use select_related for employee data in leave requests.\n\n**Expected:** Response includes employee name and email without additional queries.\n\n**Note:** This is verified by checking response structure and performance.",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.expect(pm.response.code).to.equal(200);",
+											"});",
+											"",
+											"pm.test(\"Response includes employee data\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    if (jsonData.results && jsonData.results.length > 0) {",
+											"        const firstLeave = jsonData.results[0];",
+											"        pm.expect(firstLeave).to.have.property('employee_name');",
+											"        pm.expect(firstLeave).to.have.property('employee_email');",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/leaves/?page=1&page_size=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "leaves", ""],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "page_size",
+											"value": "10"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Documentation",
+			"description": "API documentation endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"description": "Check API health status. Returns database and cache status.\n\n**Response:**\n- `status` - Overall status: `healthy` or `degraded`\n- `database` - Database status: `healthy` or `unhealthy`\n- `cache` - Cache status: `healthy` or `unhealthy`\n- `timestamp` - Current timestamp\n\n**Status Codes:**\n- `200` - All systems healthy\n- `503` - Service degraded (database or cache unhealthy)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 503\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 503]);",
+									"});",
+									"",
+									"pm.test(\"Response has status field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"    pm.expect(jsonData.status).to.be.oneOf(['healthy', 'degraded']);",
+									"});",
+									"",
+									"pm.test(\"Response has database field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('database');",
+									"    pm.expect(jsonData.database).to.be.oneOf(['healthy', 'unhealthy']);",
+									"});",
+									"",
+									"pm.test(\"Response has cache field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('cache');",
+									"    pm.expect(jsonData.cache).to.be.oneOf(['healthy', 'unhealthy']);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health", ""]
+						}
+					}
+				},
+				{
+					"name": "Swagger UI",
+					"description": "Interactive API documentation (Swagger UI)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/docs/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "docs", ""]
+						}
+					}
+				},
+				{
+					"name": "OpenAPI Schema",
+					"description": "OpenAPI 3.0 schema in JSON format",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/schema/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "schema", ""]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "employee_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
